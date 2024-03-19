@@ -1,4 +1,5 @@
 use yarbac::routes;
+use yarbac::configuration::get_configuration;
 
 use axum::{
     routing::get,
@@ -11,6 +12,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() {
+    let config = get_configuration().expect("Failed to read configuration.");
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
@@ -21,8 +23,7 @@ async fn main() {
 
     // set up connection pool
     let manager =
-        PostgresConnectionManager::new_from_stringlike("host=localhost user=postgres", NoTls)
-            .unwrap();
+        PostgresConnectionManager::new(config.database.with_db(), NoTls);
     let pool = Pool::builder().build(manager).await.unwrap();
 
     // build our application with some routes
