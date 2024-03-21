@@ -1,17 +1,50 @@
-use crate::errors::internal_error;
-use crate::db::DatabaseConnection;
-use axum::http::StatusCode;
+use crate::{
+    db::{DatabaseConnection, ConnectionPool},
+    errors::internal_error
+};
+use axum::{
+    routing::{get, post},
+    Router,
+    http::StatusCode
+};
 
-pub async fn add_permission(
-    DatabaseConnection(conn): DatabaseConnection,
-    permission_name: &String
+pub async fn router() -> Router<ConnectionPool> {
+    let router = Router::new().route("/", post(insert));
+    router
+}
+
+async fn insert(
+    DatabaseConnection(conn): DatabaseConnection
 ) -> Result<String, (StatusCode, String)> {
-    let row = conn
-        .query_one("INSERT INTO permissions (name) VALUES ()", &[permission_name])
+
+    let _result = conn
+        .query(include_str!("sql/insert.sql"), &[])
         .await
         .map_err(internal_error)?;
 
-    let two: i32 = row.try_get(0).map_err(internal_error)?;
+    Ok("ok".to_string())
+}
 
-    Ok(two.to_string())
+async fn update(
+    DatabaseConnection(conn): DatabaseConnection
+) -> Result<String, (StatusCode, String)> {
+
+    let _result = conn
+        .query(include_str!("sql/update.sql"), &[])
+        .await
+        .map_err(internal_error)?;
+
+    Ok("ok".to_string())
+}
+
+async fn delete(
+    DatabaseConnection(conn): DatabaseConnection
+) -> Result<String, (StatusCode, String)> {
+
+    let _result = conn
+        .query(include_str!("sql/delete.sql"), &[])
+        .await
+        .map_err(internal_error)?;
+
+    Ok("ok".to_string())
 }

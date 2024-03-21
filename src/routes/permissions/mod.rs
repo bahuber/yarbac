@@ -1,3 +1,3 @@
 mod lib;
 
-use lib::*;
+pub use lib::router;

@@ -1,3 +1,0 @@
-mod lib;
-
-use lib::*;

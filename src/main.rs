@@ -35,10 +35,11 @@ async fn main() {
         .route(
             "/health_check", get(routes::health_check)
         )
+        .nest("/permissions", routes::permissions::router().await)
         .with_state(pool);
 
-    // run it
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+    let address = format!("{}:{}", config.application.host, config.application.port);
+    let listener = tokio::net::TcpListener::bind(address)
         .await
         .unwrap();
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
