@@ -25,6 +25,15 @@ async fn main() {
     let manager =
         PostgresConnectionManager::new(config.database.with_db(), NoTls);
     let pool = Pool::builder().build(manager).await.unwrap();
+    
+    let mut conn = pool.get_owned().await.unwrap();
+    let txn = conn.transaction().await.unwrap();
+    
+    let _s = txn.batch_execute(include_str!("migrations.sql"))
+        .await
+        .unwrap();
+    
+    txn.commit().await.unwrap();
 
     // build our application with some routes
     let app = Router::new()
